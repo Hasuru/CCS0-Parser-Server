@@ -1,46 +1,43 @@
 -module(lts_server).
--export([start/0, loop/0, join/1, ccs0_to_lts/4, translate/2]).
+-export([start/0, loop/0, getState/1, ccs0_to_lts/4, translate/2]).
 
 %----------------------------%
 % LADO DO SERVIDOR
 
--type ccs0() :: {string(), zero}
-              | {string(), ccs0()}
-              | {choice, ccs0(), ccs0()}.
+-type ast() :: {string(), zero}
+              | {string(), ast()}
+              | {choice, ast(), ast()}.
 
 % estupido, mas funciona
-join(State) ->
+getState(Trans) ->
     lists:map(fun(I)->
         list_to_atom(lists:flatten(io_lib:format("s~B", [I])))
-        end, lists:seq(State,State)).
+        end, lists:seq(Trans,Trans)).
 
 % funcao de traducao ccs0 para lts
 % especificar que recebe ccs0 como argumento
--spec ccs0_to_lts(ccs0(), string(), number(), Res) -> Res.
+-spec ccs0_to_lts(ast(), string(), number(), list()) -> ast().
 
 % Teste (que nao funciona nao sei pq)
-ccs0_to_lts(Ast, LastRead, CurState, Res) ->
-    io_lib:format(Ast),
-    Res.
-%ccs0_to_lts({State, zero}, LastRead, CurState, Res) ->
-%    [H1|_] = join(CurState),
-%    Res ++ [{H1, 
-%            list_to_atom(State), 
-%            s0}].
-%ccs0_to_lts({State, AST}, LastRead, CurState, Res) ->
-%    [H1|_] = join(CurState),
-%    [H2|_] = join(CurState+1),
+ccs0_to_lts({Prefix, Ast}, LastTrans, CurState, Res) ->
+    Ast.
+%ccs0_to_lts({Trans, zero}, _ , CurState, Res) ->
+%    [H1|_] = getState(CurState),
+%    Res ++ [{H1,list_to_atom(Trans), s0}].
+%ccs0_to_lts({Trans, Ast}, _ , CurState, Res) ->
+%    [H1|_] = getState(CurState),
+%    [H2|_] = getState(CurState+1),
 %    Res ++ 
-%    [{H1, list_to_atom(State), H2}] ++
-%    ccs0_to_lts(AST, State, CurState+1, Res).
-%ccs0_to_lts({choice, Left, Right}, LastRead, CurState, Res) ->
-%    [H1|_] = join(CurState),
-%    [H2|_] = join(CurState+1),
-%    [H3|_] = join(CurState+2),
+%    [{H1, list_to_atom(Trans), H2}] ++
+%    ccs0_to_lts(Ast, Trans, CurState+1, Res).
+%ccs0_to_lts({choice, Left, Right}, LastTrans, CurState, Res) ->
+%    [H1|_] = getState(CurState-1),
+%    [H2|_] = getState(CurState), % LEFT State
+%    [H3|_] = getState(CurState+1), % RIGHT State
 %    Res ++
-%    [{H1, list_to_atom(LastRead), H2}, {H1, list_to_atom(LastRead), H3}] ++
-%    ccs0_to_lts(Left, LastRead, CurState+1, Res) ++
-%    ccs0_to_lts(Right, LastRead, CurState+2, Res).
+%    [{H1, list_to_atom(LastTrans), H2}, {H1, list_to_atom(LastTrans), H3}] ++
+%    ccs0_to_lts(Left, LastTrans, CurState, Res) ++
+%    ccs0_to_lts(Right, LastTrans, CurState+1, Res).
 
 start() ->
     spawn(fun() -> loop() end).
@@ -56,8 +53,8 @@ loop() ->
             From ! {self()},
             loop();
 
-        {translate, From, AST} ->
-            From ! {response, ccs0_to_lts(AST, "", 1, [])},
+        {translate, From, Ast} ->
+            From ! {response, ccs0_to_lts(Ast, "", 1, [])},
             loop();
 
         {Other, From} ->
@@ -68,8 +65,8 @@ loop() ->
 %----------------------------%
 % LADO DO CLIENTE
 
-translate(Server, AST) ->
-    Server ! {translate, self(), AST},
+translate(Server, Ast) ->
+    Server ! {translate, self(), Ast},
     receive
         {response, Result} ->
             Result
