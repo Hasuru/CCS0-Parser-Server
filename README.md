@@ -26,7 +26,7 @@ Poderemos ter também múltiplas formas de executar um processo, ou seja:
 
 A sintaxe codificante da expressão CSS0 poderá ser descrita como:
 
-- *a.b.(c.0 + d.0)* => **{"a", "b", choice {{"c", zero}, {"d", zero}}}**
+- *a.b.(c.0 + d.0)* => **{"a", {"b", {choice {{"c", zero}, {"d", zero}}}}}**
 
 <br>
 
@@ -46,12 +46,12 @@ O LTS consiste em um triplo (S, ->, s) em que:
 
 O servidor retorna uma lista que contem todas as funções transição recebidas em formato CCS0, ou seja, a resposta do servidor à expressão indicada em cima seria:
 
-- **[{s1, a, s2}, {s2, b, s3}, {s3, b, s4}, {s4, c, s0}, {s4, d, s0}]** onde:
+- **[{s1, a, s2}, {s2, b, s3}, {s3, b, s4}, {s4, c, sf}, {s4, d, sf}]** onde:
     - s1 = "a";
-    - s2 = {"b", choice {{"c", zero}, {"d", zero}}};
+    - s2 = {"b", {choice, {{"c", zero}, {"d", zero}}};
     - s3 = {"c", zero};
     - s4 = {"d", zero};
-    - s0 = zero.
+    - sf = zero.
 
 <hr>
 
@@ -67,4 +67,4 @@ Para executar o código deve:
 
 O termo AST_CSS0 pode ser introduzido na função translate, como pode ser associado a uma variável e introduzido na função.
 
-- exemplo : AST_CSS0 = {"a", "b", choice {{"c", zero}, {"d", zero}}} . 
+- exemplo : AST_CSS0 = {"a", {"b", {choice, {{"c", zero}, {"d", zero}}}}} . 
