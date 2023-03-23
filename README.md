@@ -67,4 +67,4 @@ Para executar o código deve:
 
 O termo AST_CSS0 pode ser introduzido na função translate, como pode ser associado a uma variável e introduzido na função.
 
-- exemplo : AST_CSS0 = {"a", {"b", {choice, {{"c", zero}, {"d", zero}}}}} . 
+- exemplo : AST_CSS0 = {"a", {"b", {choice, {"c", zero}, {"d", zero}}}} . 
